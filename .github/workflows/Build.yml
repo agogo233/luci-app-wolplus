@@ -24,6 +24,7 @@ jobs:
           FEEDNAME: packages_ci
           PACKAGES: luci-app-wolplus
           NO_REFRESH_CHECK: true
+          V: sc
       - name: Upload artifacts
         uses: actions/upload-artifact@main
         with:
