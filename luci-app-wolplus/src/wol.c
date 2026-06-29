@@ -1,13 +1,13 @@
 /**
  * wol.c - 轻量级 Wake-on-LAN 唤醒工具
- * 
- * 编译: 
+ *
+ * 编译:
  *   Linux 本地编译   : make linux
  *   MinGW 交叉编译    : make windows
- * 
+ *
  * 用法:
  *   ./wol <MAC地址> [IP地址] [端口]
- * 
+ *
  * 参数:
  *   MAC地址  目标设备MAC (格式 AA:BB:CC:DD:EE:FF 或 AA-BB-CC-DD-EE-FF)
  *   IP地址   广播地址 (默认 255.255.255.255)
@@ -25,7 +25,7 @@
     #include <winsock2.h>
     #include <windows.h>
     #include <ws2tcpip.h>
-    
+
     /* 关闭 socket 的兼容函数 */
     #define CLOSE_SOCKET(s)  closesocket(s)
 #else
@@ -34,7 +34,7 @@
     #include <sys/socket.h>
     #include <netinet/in.h>
     #include <arpa/inet.h>
-    
+
     #define CLOSE_SOCKET(s)  close(s)
 #endif
 
@@ -63,7 +63,7 @@ static void usage(const char *prog)
 /**
  * 解析 MAC 地址字符串
  * 支持 AA:BB:CC:DD:EE:FF 和 AA-BB-CC-DD-EE-FF 格式
- * 
+ *
  * @param mac_str  输入的MAC地址字符串
  * @param mac_out  输出6字节MAC地址缓冲区
  * @return 成功返回0，失败返回-1
@@ -71,6 +71,10 @@ static void usage(const char *prog)
 static int parse_mac(const char *mac_str, uint8_t *mac_out)
 {
     size_t len = strlen(mac_str);
+    char sep;
+    int i;
+    int pos;
+    unsigned int byte;
 
     /* 基本长度校验 */
     if (len != MAC_STR_LEN) {
@@ -78,15 +82,14 @@ static int parse_mac(const char *mac_str, uint8_t *mac_out)
     }
 
     /* 检查分隔符一致性 */
-    char sep = mac_str[2];
+    sep = mac_str[2];
     if (sep != ':' && sep != '-') {
         return -1;
     }
 
     /* 校验格式: 每两个hex字符 + 分隔符 */
-    int i;
     for (i = 0; i < MAC_OCTETS; i++) {
-        int pos = i * 3;
+        pos = i * 3;
         if (!isxdigit((unsigned char)mac_str[pos]) ||
             !isxdigit((unsigned char)mac_str[pos + 1])) {
             return -1;
@@ -98,7 +101,6 @@ static int parse_mac(const char *mac_str, uint8_t *mac_out)
 
     /* 解析数值 */
     for (i = 0; i < MAC_OCTETS; i++) {
-        unsigned int byte;
         if (sscanf(mac_str + i * 3, "%2x", &byte) != 1) {
             return -1;
         }
@@ -110,7 +112,7 @@ static int parse_mac(const char *mac_str, uint8_t *mac_out)
 
 /**
  * 构建并发送 Wake-on-LAN 魔法包
- * 
+ *
  * @param mac      6字节目标MAC地址
  * @param ip_str   目标IP地址字符串
  * @param port     目标端口
@@ -121,9 +123,15 @@ static void send_wol_packet(const uint8_t *mac, const char *ip_str, int port)
     struct sockaddr_in addr;
     int sock;
     int opt = 1;
+#ifdef _WIN32
+    char opt_val = (char)opt;
+#else
+    int opt_val = opt;
+#endif
+    int sent;
+    int i;
 
     /* 构建魔法包: 6字节0xFF + 16次重复MAC */
-    int i;
     memset(packet, 0xFF, MAC_OCTETS);
     for (i = 0; i < MAC_REPEAT; i++) {
         memcpy(packet + MAC_OCTETS + (i * MAC_OCTETS), mac, MAC_OCTETS);
@@ -134,13 +142,6 @@ static void send_wol_packet(const uint8_t *mac, const char *ip_str, int port)
     if (sock < 0) {
         die("创建 socket 失败");
     }
-
-    /* Windows 下 setsockopt 需要 const char* 类型 */
-    #ifdef _WIN32
-        char opt_val = (char)opt;
-    #else
-        int opt_val = opt;
-    #endif
 
     /* 启用广播 */
     if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST,
@@ -159,8 +160,8 @@ static void send_wol_packet(const uint8_t *mac, const char *ip_str, int port)
     }
 
     /* 发送魔法包 */
-    int sent = sendto(sock, (const char *)packet, WOL_PKT_SIZE, 0,
-                      (struct sockaddr *)&addr, sizeof(addr));
+    sent = sendto(sock, (const char *)packet, WOL_PKT_SIZE, 0,
+                  (struct sockaddr *)&addr, sizeof(addr));
     if (sent < 0) {
         CLOSE_SOCKET(sock);
         die("发送数据包失败");
@@ -175,9 +176,16 @@ int main(int argc, char *argv[])
     const char *ip_str = "255.255.255.255";
     int port = WOL_PORT_DEFAULT;
     char mac_upper[MAC_STR_LEN + 1];
-
+    size_t mac_len;
+    int all_zero;
+    int i;
+    char *endptr;
+    long p;
 #ifdef _WIN32
     WSADATA wsaData;
+#endif
+
+#ifdef _WIN32
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
         die("初始化 Winsock 失败");
     }
@@ -189,11 +197,11 @@ int main(int argc, char *argv[])
     }
 
     /* 复制并转换为大写，统一处理 */
-    size_t mac_len = strlen(argv[1]);
+    mac_len = strlen(argv[1]);
     if (mac_len > MAC_STR_LEN) {
         die("MAC地址过长");
     }
-    for (size_t i = 0; i < mac_len; i++) {
+    for (i = 0; i < (int)mac_len; i++) {
         mac_upper[i] = (char)toupper((unsigned char)argv[1][i]);
     }
     mac_upper[mac_len] = '\0';
@@ -204,8 +212,7 @@ int main(int argc, char *argv[])
     }
 
     /* 校验 MAC 地址：不能全零或多播 */
-    int all_zero = 1;
-    int i;
+    all_zero = 1;
     for (i = 0; i < MAC_OCTETS; i++) {
         if (mac[i] != 0x00) { all_zero = 0; break; }
     }
@@ -217,8 +224,7 @@ int main(int argc, char *argv[])
         ip_str = argv[2];
     }
     if (argc > 3) {
-        char *endptr;
-        long p = strtol(argv[3], &endptr, 10);
+        p = strtol(argv[3], &endptr, 10);
         if (*endptr != '\0' || p <= 0 || p > 65535) {
             die("端口号无效 (应为 1-65535)");
         }
