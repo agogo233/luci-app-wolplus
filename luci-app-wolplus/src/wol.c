@@ -84,7 +84,8 @@ static int parse_mac(const char *mac_str, uint8_t *mac_out)
     }
 
     /* 校验格式: 每两个hex字符 + 分隔符 */
-    for (int i = 0; i < MAC_OCTETS; i++) {
+    int i;
+    for (i = 0; i < MAC_OCTETS; i++) {
         int pos = i * 3;
         if (!isxdigit((unsigned char)mac_str[pos]) ||
             !isxdigit((unsigned char)mac_str[pos + 1])) {
@@ -96,7 +97,7 @@ static int parse_mac(const char *mac_str, uint8_t *mac_out)
     }
 
     /* 解析数值 */
-    for (int i = 0; i < MAC_OCTETS; i++) {
+    for (i = 0; i < MAC_OCTETS; i++) {
         unsigned int byte;
         if (sscanf(mac_str + i * 3, "%2x", &byte) != 1) {
             return -1;
@@ -122,8 +123,9 @@ static void send_wol_packet(const uint8_t *mac, const char *ip_str, int port)
     int opt = 1;
 
     /* 构建魔法包: 6字节0xFF + 16次重复MAC */
+    int i;
     memset(packet, 0xFF, MAC_OCTETS);
-    for (int i = 0; i < MAC_REPEAT; i++) {
+    for (i = 0; i < MAC_REPEAT; i++) {
         memcpy(packet + MAC_OCTETS + (i * MAC_OCTETS), mac, MAC_OCTETS);
     }
 
