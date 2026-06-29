@@ -13,7 +13,12 @@
 					txt="<%:Please [Save & Apply] your changes first%>";
 					alert( txt.replace(new RegExp("<%:&%>", "g"), "&") );
 				} else {
-					alert( JSON.parse(x.response).data );
+					try {
+						var resp = JSON.parse(x.response);
+						alert(resp.data || "");
+					} catch(e) {
+						alert("Request failed");
+					}
 				}
 			}
 		);

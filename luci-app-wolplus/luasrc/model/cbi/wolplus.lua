@@ -24,9 +24,9 @@ btn.inputstyle	= "apply"
 btn.disabled	= false
 btn.template = "wolplus/awake"
 function gen_uuid(format)
-    local uuid = i.exec("echo -n $(cat /proc/sys/kernel/random/uuid)")
+    local uuid = i.exec("cat /proc/sys/kernel/random/uuid")
     if format == nil then
-        uuid = string.gsub(uuid, "-", "")
+        uuid = uuid:gsub("-", "")
     end
     return uuid
 end

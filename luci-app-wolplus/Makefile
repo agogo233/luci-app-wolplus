@@ -9,6 +9,7 @@ PKG_MAINTAINER:=sundaqiang
 
 LUCI_TITLE:=LuCI support for wolplus
 LUCI_PKGARCH:=all
+LUCI_DEPENDS:=+luci-base
 
 include $(INCLUDE_DIR)/package.mk
 

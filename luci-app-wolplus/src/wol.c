@@ -201,6 +201,15 @@ int main(int argc, char *argv[])
         die("MAC地址格式错误 (应为 AA:BB:CC:DD:EE:FF 或 AA-BB-CC-DD-EE-FF)");
     }
 
+    /* 校验 MAC 地址：不能全零或多播 */
+    int all_zero = 1;
+    int i;
+    for (i = 0; i < MAC_OCTETS; i++) {
+        if (mac[i] != 0x00) { all_zero = 0; break; }
+    }
+    if (all_zero) { die("MAC 地址不能全为零"); }
+    if (mac[0] & 0x01) { die("MAC 地址不能是多播地址"); }
+
     /* 解析可选参数 */
     if (argc > 2) {
         ip_str = argv[2];
