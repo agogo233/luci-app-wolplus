@@ -9,10 +9,19 @@ function index()
 end
 
 function awake(sections)
-	lan = x:get("wolplus",sections,"maceth")
-	mac = x:get("wolplus",sections,"macaddr")
+	lan = x:get("wolplus", sections, "maceth")
+	mac = x:get("wolplus", sections, "macaddr")
+
+	-- 获取接口的广播地址
+	local f = io.popen("ip -4 -o addr show " .. lan .. " 2>/dev/null | awk '{print $6}'")
+	local broadcast = f and f:read("*l") or nil
+	if f then f:close() end
+	if not broadcast or broadcast == "" then
+		broadcast = "255.255.255.255"
+	end
+
     local e = {}
-    cmd = "/usr/bin/etherwake -D -i " .. lan .. " -b " .. mac .. " 2>&1"
+    local cmd = "/usr/bin/wol " .. mac .. " " .. broadcast .. " 2>&1"
 	local p = io.popen(cmd)
 	local msg = ""
 	if p then
