@@ -1,0 +1,31 @@
+name: Build
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}-${{ matrix.branch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - x86_64
+        branch:
+          - openwrt-24.10
+    steps:
+      - uses: actions/checkout@main
+        with:
+          fetch-depth: 0
+      - name: Building packages
+        uses: openwrt/gh-action-sdk@main
+        env:
+          ARCH: ${{ matrix.arch }}-${{ matrix.branch }}
+          FEEDNAME: packages_ci
+          PACKAGES: luci-app-wolplus
+          NO_REFRESH_CHECK: true
+      - name: Upload artifacts
+        uses: actions/upload-artifact@main
+        with:
+          name: luci-app-wolplus-${{ matrix.arch }}-${{ matrix.branch }}
+          path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
