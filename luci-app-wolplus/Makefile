@@ -3,6 +3,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=luci-app-wolplus
 PKG_VERSION:=1.2
 PKG_RELEASE:=1
+PKG_BUILD_DEPENDS:=luci-base/host
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
 PKG_MAINTAINER:=agogo233
@@ -51,7 +52,7 @@ define Package/luci-app-wolplus/install
 	$(INSTALL_BIN) ./root/etc/uci-defaults/luci-app-wolplus $(1)/etc/uci-defaults/luci-app-wolplus
 
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	po2lmo ./po/zh-cn/wolplus.po $(1)/usr/lib/lua/luci/i18n/wolplus.zh-cn.lmo
+	$(STAGING_DIR_HOST)/bin/po2lmo ./po/zh-cn/wolplus.po $(1)/usr/lib/lua/luci/i18n/wolplus.zh-cn.lmo
 endef
 
 $(eval $(call BuildPackage,luci-app-wolplus))
