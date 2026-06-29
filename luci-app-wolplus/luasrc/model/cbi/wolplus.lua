@@ -51,7 +51,7 @@ end
 
 function e.create(e, t)
     local id = gen_uuid()
-    TypedSection.create(e, id)
+    return TypedSection.create(e, id)
 end
 
 -- 定时任务管理：提交时重建 crontab
