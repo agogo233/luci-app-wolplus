@@ -29,7 +29,6 @@ endef
 
 define Build/Compile
 	$(TARGET_CC) $(TARGET_CFLAGS) -o $(PKG_BUILD_DIR)/wol $(PKG_BUILD_DIR)/wol.c
-	$(TARGET_STRIP) $(PKG_BUILD_DIR)/wol
 endef
 
 define Package/luci-app-wolplus/install
