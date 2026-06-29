@@ -52,7 +52,7 @@ define Package/luci-app-wolplus/install
 	$(INSTALL_BIN) ./root/etc/uci-defaults/luci-app-wolplus $(1)/etc/uci-defaults/luci-app-wolplus
 
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	$(STAGING_DIR_HOST)/bin/po2lmo ./po/zh-cn/wolplus.po $(1)/usr/lib/lua/luci/i18n/wolplus.zh-cn.lmo
+	$(STAGING_DIR_HOSTPKG)/bin/po2lmo ./po/zh-cn/wolplus.po $(1)/usr/lib/lua/luci/i18n/wolplus.zh-cn.lmo
 endef
 
 $(eval $(call BuildPackage,luci-app-wolplus))
