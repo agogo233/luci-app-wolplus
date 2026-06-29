@@ -1,5 +1,6 @@
 local i = require "luci.sys"
 local t, e
+local a, nolimit_mac, nolimit_eth, cron, lastwake, btn
 
 t = Map("wolplus", translate("Wake on LAN +"), translate("Wake on LAN is a mechanism to remotely boot computers in the local network.") .. [[<br/><br/><a href="https://github.com/agogo233" target="_blank">Powered by agogo233</a>]])
 t.template = "wolplus/index"
@@ -17,7 +18,7 @@ i.net.mac_hints(function(e, t) nolimit_mac:value(e, "%s (%s)" % {e, t}) end)
 
 nolimit_eth = e:option(Value, "maceth", translate("Network Interface"))
 nolimit_eth.rmempty = false
-for t, e in ipairs(i.net.devices()) do if e ~= "lo" then nolimit_eth:value(e) end end
+for _, dev in ipairs(i.net.devices()) do if dev ~= "lo" then nolimit_eth:value(dev) end end
 
 -- 定时唤醒（HH:MM 格式，每日执行）
 cron = e:option(Value, "wake_cron", translate("Scheduled Wake"))
@@ -42,18 +43,15 @@ btn.inputstyle = "apply"
 btn.disabled = false
 btn.template = "wolplus/awake"
 
-function gen_uuid(format)
-    local uuid = i.exec("cat /proc/sys/kernel/random/uuid")
-    if format == nil then
-        uuid = uuid:gsub("-", "")
-    end
-    return uuid
+local function gen_uuid()
+    local t = tostring(os.time())
+    local r = tostring(math.random(99999))
+    return t .. r
 end
 
 function e.create(e, t)
-    local uuid = gen_uuid()
-    t = uuid
-    TypedSection.create(e, t)
+    local id = gen_uuid()
+    TypedSection.create(e, id)
 end
 
 -- 定时任务管理：提交时重建 crontab
@@ -62,7 +60,8 @@ function t.on_commit(map)
     local lines = {}
 
     if not nixio.fs.access(crontab_path) then
-        os.execute("touch " .. crontab_path)
+        local fh = io.open(crontab_path, "w")
+        if fh then fh:close() end
     end
 
     local f = io.open(crontab_path, "r")
@@ -83,7 +82,7 @@ function t.on_commit(map)
             if hh and mm then
                 local mac = s.macaddr or ""
                 table.insert(lines, string.format("%s %s * * * /usr/bin/wol %s 255.255.255.255 2>/dev/null # wolplus:%s:%s",
-                    mm, hh, mac, s[".name"] or "", s.name or ""))
+                    mm, hh, mac, s[".name"] or "", (s.name or ""):gsub("[#\n]", "")))
             end
         end
     end)

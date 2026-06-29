@@ -106,11 +106,13 @@
 					j.devices.forEach(function(dev) {
 						var el = document.getElementById("status_" + dev.section);
 						if (el) {
-							var info = dev.hostname ? dev.hostname + " " : "";
-							if (dev.ip) info += "(" + dev.ip + ")";
 							el.innerHTML = dev.online
-								? '<span style="color:green">\\u25cf <%:Online%></span> ' + info
+								? '<span style="color:green">\\u25cf <%:Online%></span>'
 								: '<span style="color:#999">\\u25cf <%:Offline%></span>';
+							var infoText = "";
+							if (dev.hostname) infoText += dev.hostname + " ";
+							if (dev.ip) infoText += "(" + dev.ip + ")";
+							if (infoText) el.appendChild(document.createTextNode(" " + infoText));
 						}
 					});
 				} catch(e) {}

@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <ctype.h>
+#include <errno.h>
 
 #ifdef _WIN32
     /* Windows 平台 */
@@ -47,7 +48,11 @@
 /* 输出错误信息并退出 */
 static void die(const char *msg)
 {
-    fprintf(stderr, "错误: %s\n", msg);
+    fprintf(stderr, "错误: %s", msg);
+    if (errno != 0) {
+        fprintf(stderr, " (%s)", strerror(errno));
+    }
+    fprintf(stderr, "\n");
     exit(EXIT_FAILURE);
 }
 
@@ -162,9 +167,9 @@ static void send_wol_packet(const uint8_t *mac, const char *ip_str, int port)
     /* 发送魔法包 */
     sent = sendto(sock, (const char *)packet, WOL_PKT_SIZE, 0,
                   (struct sockaddr *)&addr, sizeof(addr));
-    if (sent < 0) {
+    if (sent != WOL_PKT_SIZE) {
         CLOSE_SOCKET(sock);
-        die("发送数据包失败");
+        die("发送数据包不完整");
     }
 
     CLOSE_SOCKET(sock);

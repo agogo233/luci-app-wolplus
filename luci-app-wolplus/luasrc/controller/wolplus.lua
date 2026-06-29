@@ -11,7 +11,7 @@ end
 
 -- 工具函数：获取广播地址
 local function get_broadcast(iface)
-    local f = io.popen("ip -4 -o addr show " .. iface .. " 2>/dev/null | awk '{print $6}'")
+    local f = io.popen(string.format("ip -4 -o addr show %s 2>/dev/null | awk '{print $6}'", string.format("%q", iface)))
     local bc = f and f:read("*l") or nil
     if f then f:close() end
     if not bc or bc == "" then bc = "255.255.255.255" end
@@ -37,7 +37,7 @@ end
 -- 工具函数：检查 IP neighbor
 local function check_ip_neigh(mac, iface)
     local mac_lower = mac:lower()
-    local f = io.popen("ip neigh show dev " .. iface .. " 2>/dev/null")
+    local f = io.popen(string.format("ip neigh show dev %s 2>/dev/null", string.format("%q", iface)))
     if not f then return false, nil end
     for line in f:lines() do
         local ip, status, hw_addr = line:match("^(%S+)%s+lladdr%s+([%x:]+)%s+(%S+)")
@@ -54,7 +54,7 @@ end
 
 -- 工具函数：ping 检测
 local function ping_check(ip, iface)
-    local cmd = "ping -c 1 -W 1 -I " .. iface .. " " .. ip .. " 2>/dev/null"
+    local cmd = string.format("ping -c 1 -W 1 -I %s %s 2>/dev/null", string.format("%q", iface), string.format("%q", ip))
     return os.execute(cmd) == 0
 end
 
@@ -73,7 +73,7 @@ local function resolve_hostname(mac, ip)
     f:close()
     -- 再从 ARP 缓存反查 IP → hostname
     if ip then
-        local f2 = io.popen("cat /tmp/dhcp.leases 2>/dev/null | grep " .. ip .. " | head -1")
+        local f2 = io.popen(string.format("cat /tmp/dhcp.leases 2>/dev/null | grep %s | head -1", string.format("%q", ip)))
         if f2 then
             local line2 = f2:read("*l")
             f2:close()
@@ -102,7 +102,7 @@ function awake(sections)
     end
 
     local broadcast = get_broadcast(lan)
-    local cmd = "/usr/bin/wol " .. mac .. " " .. broadcast .. " 2>&1"
+    local cmd = string.format("/usr/bin/wol %s %s 2>&1", string.format("%q", mac), string.format("%q", broadcast))
     local p = io.popen(cmd)
     local msg = ""
     if p then
@@ -119,7 +119,7 @@ function awake(sections)
     end
 
     local name = x:get("wolplus", sections, "name") or ""
-    os.execute(string.format("logger -t wolplus 'awake: %s %s'", name, mac))
+    os.execute(string.format("logger -t wolplus 'awake: %s %s'", string.format("%q", name), string.format("%q", mac)))
 
     luci.http.prepare_content("application/json")
     luci.http.write_json({success = #msg == 0, data = msg, name = name, mac = mac})
@@ -174,8 +174,8 @@ function awakeall()
 
         if mac:match("^%x%x:%x%x:%x%x:%x%x:%x%x:%x%x$") then
             local broadcast = get_broadcast(eth)
-            os.execute("/usr/bin/wol " .. mac .. " " .. broadcast .. " 2>/dev/null")
-            os.execute(string.format("logger -t wolplus 'awake_all: %s %s'", name, mac))
+            os.execute(string.format("/usr/bin/wol %s %s 2>/dev/null", string.format("%q", mac), string.format("%q", broadcast)))
+            os.execute(string.format("logger -t wolplus 'awake_all: %s %s'", string.format("%q", name), string.format("%q", mac)))
             table.insert(results, {name = name, mac = mac, success = true})
         else
             table.insert(results, {name = name, mac = mac, success = false})

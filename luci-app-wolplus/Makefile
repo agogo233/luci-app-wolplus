@@ -4,13 +4,9 @@ PKG_NAME:=luci-app-wolplus
 PKG_VERSION:=1.2
 PKG_RELEASE:=1
 PKG_BUILD_DEPENDS:=luci-base/host
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_MAINTAINER:=agogo233
-
-LUCI_TITLE:=LuCI support for wolplus
-LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+luci-base
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -19,7 +15,7 @@ define Package/luci-app-wolplus
   CATEGORY:=LuCI
   SUBMENU:=3. Applications
   TITLE:=LuCI support for wolplus
-  DEPENDS:=+libc
+  DEPENDS:=+libc +luci-base
   PKGARCH:=all
 endef
 
@@ -29,7 +25,7 @@ define Build/Prepare
 endef
 
 define Build/Compile
-	$(TARGET_CC) $(TARGET_CFLAGS) -o $(PKG_BUILD_DIR)/wol $(PKG_BUILD_DIR)/wol.c
+	$(TARGET_CC) $(TARGET_CFLAGS) $(TARGET_LDFLAGS) -o $(PKG_BUILD_DIR)/wol $(PKG_BUILD_DIR)/wol.c
 endef
 
 define Package/luci-app-wolplus/install
