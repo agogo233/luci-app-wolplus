@@ -21,3 +21,60 @@ msgstr "唤醒"
 
 msgid "Please [Save & Apply] your changes first"
 msgstr "请先保存并应用您的设置"
+
+msgid "Wake All"
+msgstr "全部唤醒"
+
+msgid "Check Status"
+msgstr "在线检查"
+
+msgid "Import from ARP"
+msgstr "ARP 导入"
+
+msgid "Status"
+msgstr "状态"
+
+msgid "Online"
+msgstr "在线"
+
+msgid "Offline"
+msgstr "离线"
+
+msgid "Scheduled Wake"
+msgstr "定时唤醒"
+
+msgid "Last Woken"
+msgstr "最近唤醒"
+
+msgid "Search..."
+msgstr "搜索..."
+
+msgid "Processing..."
+msgstr "处理中..."
+
+msgid "Are you sure you want to wake up all devices?"
+msgstr "确定要全部唤醒所有设备吗？"
+
+msgid "Wake All Results"
+msgstr "全部唤醒结果"
+
+msgid "Awake request sent"
+msgstr "唤醒请求已发送"
+
+msgid "Request failed"
+msgstr "请求失败"
+
+msgid "No devices configured"
+msgstr "没有已配置的设备"
+
+msgid "No new devices found"
+msgstr "未发现新设备"
+
+msgid "Found devices, please add them manually"
+msgstr "发现以下设备，请在设备列表中手动添加"
+
+msgid "Daily wake time in HH:MM format, leave empty to clear"
+msgstr "每日唤醒时间 (HH:MM 格式)，留空即清除定时任务"
+
+msgid "Wake Up Host"
+msgstr "唤醒设备"

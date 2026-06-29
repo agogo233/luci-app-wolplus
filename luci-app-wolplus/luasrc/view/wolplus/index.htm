@@ -1,27 +1,155 @@
 <% include("cbi/map") %>
+<div class="cbi-section" style="margin-bottom:8px;padding:8px;">
+  <button class="cbi-button cbi-button-apply" id="btn_awakeall" onclick="awakeAll()" style="margin-right:6px;">
+    <%:Wake All%>
+  </button>
+  <button class="cbi-button cbi-input-select" id="btn_check_all" onclick="checkAllStatus()" style="margin-right:6px;">
+    <%:Check Status%>
+  </button>
+  <button class="cbi-button cbi-input-select" id="btn_import_arp" onclick="importARP()" style="margin-right:6px;">
+    <%:Import from ARP%>
+  </button>
+  <input type="text" id="search_box" placeholder="<%:Search...%>" oninput="filterTable()" style="float:right;padding:4px 8px;" />
+</div>
 <script type="text/javascript">
 	function _id2section(id) {
 		var x = id.split(".");
 		return x[2];
 	}
+
 	function onclick_awake(id) {
 		var section = _id2section(id);
+		var btn = document.getElementById(id);
+		if (btn.disabled) return;
+		var origVal = btn.value;
+		btn.disabled = true;
+		btn.value = "⏳";
+		btn.style.opacity = "0.6";
+
+		setTimeout(function() {
+			if (btn.disabled) {
+				btn.disabled = false;
+				btn.value = origVal;
+				btn.style.opacity = "1";
+			}
+		}, 5000);
+
 		var btnXHR = new XHR();
-		btnXHR.post('<%=url([[admin]], [[services]], [[wolplus]], [[awake]])%>/' + section, { token: '<%=token%>' },
+		btnXHR.post('<%=url([[admin]], [[services]], [[wolplus]], [[awake]])%>/' + section,
+			{ token: '<%=token%>' },
 			function(x, data) {
+				btn.disabled = false;
+				btn.value = origVal;
+				btn.style.opacity = "1";
 				if (x.responseText == "_uncommitted_") {
 					txt="<%:Please [Save & Apply] your changes first%>";
 					alert( txt.replace(new RegExp("<%:&%>", "g"), "&") );
 				} else {
 					try {
 						var resp = JSON.parse(x.response);
-						alert(resp.data || "");
+						var ts = new Date().toLocaleTimeString();
+						alert("<%:Awake request sent%> (" + ts + ")\n" + (resp.data || ""));
 					} catch(e) {
-						alert("Request failed");
+						alert("<%:Request failed%>");
 					}
 				}
 			}
 		);
 	}
-</script>
 
+	function awakeAll() {
+		if (!confirm("<%:Are you sure you want to wake up all devices?%>")) return;
+
+		var btn = document.getElementById("btn_awakeall");
+		var origText = btn.innerHTML;
+		btn.disabled = true;
+		btn.innerHTML = "⏳ <%:Processing...%>";
+
+		setTimeout(function() {
+			if (btn.disabled) {
+				btn.disabled = false;
+				btn.innerHTML = origText;
+			}
+		}, 8000);
+
+		var xhr = new XHR();
+		xhr.post('<%=url([[admin]], [[services]], [[wolplus]], [[awakeall]])%>',
+			{ token: '<%=token%>' },
+			function(x) {
+				btn.disabled = false;
+				btn.innerHTML = origText;
+				try {
+					var j = JSON.parse(x.response);
+					if (j.empty) {
+						alert("<%:No devices configured%>");
+						return;
+					}
+					var msg = "<%:Wake All Results%>:\\n\\n";
+					j.results.forEach(function(item) {
+						msg += (item.success ? "\\u2713" : "\\u2717") + " " + (item.name || item.mac) + "\\n";
+					});
+					alert(msg);
+				} catch(e) {
+					alert("<%:Request failed%>");
+				}
+			}
+		);
+	}
+
+	function checkAllStatus() {
+		var xhr = new XHR();
+		xhr.post('<%=url([[admin]], [[services]], [[wolplus]], [[status]])%>',
+			{ token: '<%=token%>' },
+			function(x) {
+				try {
+					var j = JSON.parse(x.response);
+					j.devices.forEach(function(dev) {
+						var el = document.getElementById("status_" + dev.section);
+						if (el) {
+							var info = dev.hostname ? dev.hostname + " " : "";
+							if (dev.ip) info += "(" + dev.ip + ")";
+							el.innerHTML = dev.online
+								? '<span style="color:green">\\u25cf <%:Online%></span> ' + info
+								: '<span style="color:#999">\\u25cf <%:Offline%></span>';
+						}
+					});
+				} catch(e) {}
+			}
+		);
+	}
+
+	function importARP() {
+		var xhr = new XHR();
+		xhr.post('<%=url([[admin]], [[services]], [[wolplus]], [[import_arp]])%>',
+			{ token: '<%=token%>' },
+			function(x) {
+				try {
+					var j = JSON.parse(x.response);
+					if (j.devices.length === 0) {
+						alert("<%:No new devices found%>");
+						return;
+					}
+					var msg = "<%:Found devices, please add them manually%>:\\n";
+					j.devices.forEach(function(d) {
+						msg += d.mac + " " + (d.hostname || "") + " (" + d.ip + ")\\n";
+					});
+					alert(msg);
+				} catch(e) {
+					alert("<%:Request failed%>");
+				}
+			}
+		);
+	}
+
+	function filterTable() {
+		var q = document.getElementById("search_box").value.toLowerCase();
+		if (q === "") {
+			document.querySelectorAll(".cbi-section-table-row").forEach(function(r) { r.style.display = ""; });
+			return;
+		}
+		document.querySelectorAll(".cbi-section-table-row").forEach(function(row) {
+			var txt = row.innerText.toLowerCase();
+			row.style.display = txt.indexOf(q) >= 0 ? "" : "none";
+		});
+	}
+</script>
