@@ -68,12 +68,12 @@
 		var btnXHR = new XHR();
 		btnXHR.post('<%=url([[admin]], [[services]], [[wolplus]], [[awake]])%>/' + section,
 			{ token: '<%=token%>' },
-			function(x, data) {
+			function(x) {
 				clearTimeout(timeoutId);
 				resetButton(btn, origVal);
-				if (x.responseText == "_uncommitted_") {
+				if (x.response == "_uncommitted_") {
 					txt="<%:Please [Save & Apply] your changes first%>";
-					alert( txt.replace(new RegExp("<%:&%>", "g"), "&") );
+					alert( txt.replace(/&/g, "&") );
 				} else {
 					try {
 						var resp = JSON.parse(x.response);
@@ -165,10 +165,10 @@
 							el.innerHTML = dev.online
 								? '<span style="color:green">&#x25cf; <%:Online%></span>'
 								: '<span style="color:#999">&#x25cf; <%:Offline%></span>';
-							var infoText = "";
-							if (dev.hostname) infoText += dev.hostname + " ";
-							if (dev.ip) infoText += "(" + dev.ip + ")";
-							if (infoText) el.appendChild(document.createTextNode(" " + infoText));
+							var parts = [];
+							if (dev.hostname) parts.push(dev.hostname);
+							if (dev.ip) parts.push("(" + dev.ip + ")");
+							if (parts.length) el.appendChild(document.createTextNode(" " + parts.join(" ")));
 						}
 					});
 				} catch(e) {

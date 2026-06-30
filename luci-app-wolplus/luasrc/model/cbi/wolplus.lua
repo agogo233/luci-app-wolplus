@@ -60,8 +60,8 @@ btn.disabled = false
 btn.template = "wolplus/awake"
 
 function e.create(e, t)
-    local id = tostring(os.time()) .. tostring(math.random(999999999))
     math.randomseed(tonumber(tostring(os.time()):reverse():sub(1, 6)))
+    local id = tostring(os.time()) .. tostring(math.random(999999999))
     return TypedSection.create(e, id)
 end
 
