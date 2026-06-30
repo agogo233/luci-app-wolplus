@@ -8,6 +8,7 @@ e = t:section(TypedSection, "macclient", translate("Host Clients"))
 e.template = "cbi/tblsection"
 e.anonymous = true
 e.addremove = true
+e.template_addremove = "wolplus/tblsection_addremove"
 
 a = e:option(Value, "name", translate("Name"))
 a.optional = false
