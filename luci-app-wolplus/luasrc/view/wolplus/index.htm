@@ -1,4 +1,14 @@
+<%+header%>
+
+<form method="post" action="<%=pcdata(REQUEST_URI)%>" enctype="multipart/form-data" onreset="return cbi_validate_reset(this)" onsubmit="return cbi_validate_form(this, '<%:Some fields are invalid, cannot save values!%>')">
+	<div>
+		<input type="hidden" name="token" value="<%=token%>" />
+		<input type="hidden" name="cbi.submit" value="1" />
+		<input type="submit" value="<%:Save%>" class="hidden" />
+	</div>
+
 <% include("cbi/map") %>
+
 <div class="cbi-section" style="margin-bottom:8px;padding:8px;">
   <button class="cbi-button cbi-button-apply" id="btn_awakeall" onclick="awakeAll()" style="margin-right:6px;">
     <%:Wake All%>
@@ -11,6 +21,15 @@
   </button>
   <input type="text" id="search_box" placeholder="<%:Search...%>" oninput="filterTable()" style="float:right;padding:4px 8px;" />
 </div>
+
+<div class="cbi-page-actions">
+	<input class="btn cbi-button cbi-button-apply" type="button" value="<%:Save & Apply%>" onclick="cbi_submit(this, 'cbi.apply')" />
+	<input class="btn cbi-button cbi-button-save" type="submit" value="<%:Save%>" />
+	<input class="btn cbi-button cbi-button-reset" type="button" value="<%:Reset%>" onclick="location.href='<%=REQUEST_URI%>'" />
+</div>
+
+</form>
+
 <script type="text/javascript">
 	var filterTimer = null;
 
@@ -223,3 +242,6 @@
 		}, 150);
 	}
 </script>
+
+<script>cbi_init();</script>
+<%+footer%>
