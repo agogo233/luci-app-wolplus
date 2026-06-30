@@ -167,7 +167,7 @@ static void send_wol_packet(const uint8_t *mac, const char *ip_str, int port)
     /* 发送魔法包 */
     sent = sendto(sock, (const char *)packet, WOL_PKT_SIZE, 0,
                   (struct sockaddr *)&addr, sizeof(addr));
-    if (sent != WOL_PKT_SIZE) {
+    if (sent < 0) {
         CLOSE_SOCKET(sock);
         die("发送数据包不完整");
     }
@@ -202,12 +202,14 @@ int main(int argc, char *argv[])
     }
 
     /* 复制并转换为大写，统一处理 */
-    mac_len = strlen(argv[1]);
+    const char *mac_input = argv[1];
+    while (isspace((unsigned char)*mac_input)) mac_input++;
+    mac_len = strlen(mac_input);
     if (mac_len > MAC_STR_LEN) {
-        die("MAC地址过长");
+        die("MAC address too long");
     }
     for (i = 0; i < (int)mac_len; i++) {
-        mac_upper[i] = (char)toupper((unsigned char)argv[1][i]);
+        mac_upper[i] = (char)toupper((unsigned char)mac_input[i]);
     }
     mac_upper[mac_len] = '\0';
 

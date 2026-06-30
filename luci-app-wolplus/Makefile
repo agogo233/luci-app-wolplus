@@ -15,7 +15,7 @@ define Package/luci-app-wolplus
   CATEGORY:=LuCI
   SUBMENU:=3. Applications
   TITLE:=LuCI support for wolplus
-  DEPENDS:=+libc +luci-base
+  DEPENDS:=+libc +luci-base +luci-lib-nixio
   PKGARCH:=all
 endef
 

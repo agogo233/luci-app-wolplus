@@ -12,9 +12,22 @@
   <input type="text" id="search_box" placeholder="<%:Search...%>" oninput="filterTable()" style="float:right;padding:4px 8px;" />
 </div>
 <script type="text/javascript">
+	var filterTimer = null;
+
 	function _id2section(id) {
 		var x = id.split(".");
 		return x[2];
+	}
+
+	function resetButton(btn, origVal) {
+		btn.disabled = false;
+		btn.value = origVal;
+		btn.style.opacity = "1";
+	}
+
+	function showError(btn, origVal) {
+		resetButton(btn, origVal);
+		alert("<%:Request failed (network error)%>");
 	}
 
 	function onclick_awake(id) {
@@ -26,21 +39,18 @@
 		btn.value = "⏳";
 		btn.style.opacity = "0.6";
 
-		setTimeout(function() {
+		var timeoutId = setTimeout(function() {
 			if (btn.disabled) {
-				btn.disabled = false;
-				btn.value = origVal;
-				btn.style.opacity = "1";
+				resetButton(btn, origVal);
 			}
-		}, 5000);
+		}, 10000);
 
 		var btnXHR = new XHR();
 		btnXHR.post('<%=url([[admin]], [[services]], [[wolplus]], [[awake]])%>/' + section,
 			{ token: '<%=token%>' },
 			function(x, data) {
-				btn.disabled = false;
-				btn.value = origVal;
-				btn.style.opacity = "1";
+				clearTimeout(timeoutId);
+				resetButton(btn, origVal);
 				if (x.responseText == "_uncommitted_") {
 					txt="<%:Please [Save & Apply] your changes first%>";
 					alert( txt.replace(new RegExp("<%:&%>", "g"), "&") );
@@ -53,6 +63,10 @@
 						alert("<%:Request failed%>");
 					}
 				}
+			},
+			function(x) {
+				clearTimeout(timeoutId);
+				showError(btn, origVal);
 			}
 		);
 	}
@@ -65,17 +79,18 @@
 		btn.disabled = true;
 		btn.innerHTML = "⏳ <%:Processing...%>";
 
-		setTimeout(function() {
+		var timeoutId = setTimeout(function() {
 			if (btn.disabled) {
 				btn.disabled = false;
 				btn.innerHTML = origText;
 			}
-		}, 8000);
+		}, 15000);
 
 		var xhr = new XHR();
 		xhr.post('<%=url([[admin]], [[services]], [[wolplus]], [[awakeall]])%>',
 			{ token: '<%=token%>' },
 			function(x) {
+				clearTimeout(timeoutId);
 				btn.disabled = false;
 				btn.innerHTML = origText;
 				try {
@@ -84,74 +99,127 @@
 						alert("<%:No devices configured%>");
 						return;
 					}
-					var msg = "<%:Wake All Results%>:\\n\\n";
+					var msg = "<%:Wake All Results%>:\n\n";
 					j.results.forEach(function(item) {
-						msg += (item.success ? "\\u2713" : "\\u2717") + " " + (item.name || item.mac) + "\\n";
+						msg += (item.success ? "&#x2713;" : "&#x2717;") + " " + (item.name || item.mac) + "\n";
 					});
 					alert(msg);
 				} catch(e) {
 					alert("<%:Request failed%>");
 				}
+			},
+			function(x) {
+				clearTimeout(timeoutId);
+				btn.disabled = false;
+				btn.innerHTML = origText;
+				alert("<%:Request failed (network error)%>");
 			}
 		);
 	}
 
 	function checkAllStatus() {
+		var btn = document.getElementById("btn_check_all");
+		var origText = btn.innerHTML;
+		btn.disabled = true;
+		btn.innerHTML = "⏳";
+
+		var timeoutId = setTimeout(function() {
+			if (btn.disabled) {
+				btn.disabled = false;
+				btn.innerHTML = origText;
+			}
+		}, 10000);
+
 		var xhr = new XHR();
 		xhr.post('<%=url([[admin]], [[services]], [[wolplus]], [[status]])%>',
 			{ token: '<%=token%>' },
 			function(x) {
+				clearTimeout(timeoutId);
+				btn.disabled = false;
+				btn.innerHTML = origText;
 				try {
 					var j = JSON.parse(x.response);
 					j.devices.forEach(function(dev) {
 						var el = document.getElementById("status_" + dev.section);
 						if (el) {
 							el.innerHTML = dev.online
-								? '<span style="color:green">\\u25cf <%:Online%></span>'
-								: '<span style="color:#999">\\u25cf <%:Offline%></span>';
+								? '<span style="color:green">&#x25cf; <%:Online%></span>'
+								: '<span style="color:#999">&#x25cf; <%:Offline%></span>';
 							var infoText = "";
 							if (dev.hostname) infoText += dev.hostname + " ";
 							if (dev.ip) infoText += "(" + dev.ip + ")";
 							if (infoText) el.appendChild(document.createTextNode(" " + infoText));
 						}
 					});
-				} catch(e) {}
+				} catch(e) {
+					alert("<%:Request failed%>");
+				}
+			},
+			function(x) {
+				clearTimeout(timeoutId);
+				btn.disabled = false;
+				btn.innerHTML = origText;
+				alert("<%:Request failed (network error)%>");
 			}
 		);
 	}
 
 	function importARP() {
+		var btn = document.getElementById("btn_import_arp");
+		var origText = btn.innerHTML;
+		btn.disabled = true;
+		btn.innerHTML = "⏳";
+
+		var timeoutId = setTimeout(function() {
+			if (btn.disabled) {
+				btn.disabled = false;
+				btn.innerHTML = origText;
+			}
+		}, 10000);
+
 		var xhr = new XHR();
 		xhr.post('<%=url([[admin]], [[services]], [[wolplus]], [[import_arp]])%>',
 			{ token: '<%=token%>' },
 			function(x) {
+				clearTimeout(timeoutId);
+				btn.disabled = false;
+				btn.innerHTML = origText;
 				try {
 					var j = JSON.parse(x.response);
 					if (j.devices.length === 0) {
 						alert("<%:No new devices found%>");
 						return;
 					}
-					var msg = "<%:Found devices, please add them manually%>:\\n";
+					var msg = "<%:Found devices, please add them manually%>:\n";
 					j.devices.forEach(function(d) {
-						msg += d.mac + " " + (d.hostname || "") + " (" + d.ip + ")\\n";
+						msg += d.mac + " " + (d.hostname || "") + " (" + d.ip + ")\n";
 					});
 					alert(msg);
 				} catch(e) {
 					alert("<%:Request failed%>");
 				}
+			},
+			function(x) {
+				clearTimeout(timeoutId);
+				btn.disabled = false;
+				btn.innerHTML = origText;
+				alert("<%:Request failed (network error)%>");
 			}
 		);
 	}
 
 	function filterTable() {
-		var q = document.getElementById("search_box").value.toLowerCase();
-		if (q === "") {
-			document.querySelectorAll(".cbi-section-table-row").forEach(function(r) { r.style.display = ""; });
-			return;
-		}
-		document.querySelectorAll(".cbi-section-table-row").forEach(function(row) {
-			var txt = row.innerText.toLowerCase();
-			row.style.display = txt.indexOf(q) >= 0 ? "" : "none";
-		});
+		if (filterTimer) clearTimeout(filterTimer);
+		filterTimer = setTimeout(function() {
+			var q = document.getElementById("search_box").value.toLowerCase();
+			if (q === "") {
+				document.querySelectorAll(".cbi-section-table-row").forEach(function(r) { r.style.display = ""; });
+				return;
+			}
+			document.querySelectorAll(".cbi-section-table-row").forEach(function(row) {
+				var txt = row.innerText.toLowerCase();
+				row.style.display = txt.indexOf(q) >= 0 ? "" : "none";
+			});
+		}, 150);
 	}
 </script>

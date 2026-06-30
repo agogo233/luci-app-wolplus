@@ -9,8 +9,44 @@ function index()
     entry({"admin", "services", "wolplus", "import_arp"}, post("import_arp")).leaf = true
 end
 
+-- 工具函数：校验 CSRF token
+local function check_csrf()
+    local token = luci.http.formvalue("token")
+    if not token or token == "" then
+        luci.http.status(403, "Forbidden")
+        return false
+    end
+    return true
+end
+
+-- 工具函数：校验 section 名称格式
+local function check_section(section)
+    if not section or not section:match("^[%w_]+$") then
+        luci.http.status(400, "Invalid section")
+        return false
+    end
+    return true
+end
+
+-- 工具函数：校验网络接口类型
+local function check_iface(iface)
+    if not iface or not iface:match("^[%w%-%._]+$") then
+        return "br-lan"
+    end
+    return iface
+end
+
+-- 工具函数：校验 MAC 地址格式
+local function check_mac(mac)
+    if not mac or not mac:match("^%x%x:%x%x:%x%x:%x%x:%x%x:%x%x$") then
+        return false
+    end
+    return true
+end
+
 -- 工具函数：获取广播地址
 local function get_broadcast(iface)
+    iface = check_iface(iface)
     local f = io.popen(string.format("ip -4 -o addr show %s 2>/dev/null | awk '{print $6}'", string.format("%q", iface)))
     local bc = f and f:read("*l") or nil
     if f then f:close() end
@@ -37,6 +73,7 @@ end
 -- 工具函数：检查 IP neighbor
 local function check_ip_neigh(mac, iface)
     local mac_lower = mac:lower()
+    iface = check_iface(iface)
     local f = io.popen(string.format("ip neigh show dev %s 2>/dev/null", string.format("%q", iface)))
     if not f then return false, nil end
     for line in f:lines() do
@@ -54,11 +91,13 @@ end
 
 -- 工具函数：ping 检测
 local function ping_check(ip, iface)
+    iface = check_iface(iface)
     local cmd = string.format("ping -c 1 -W 1 -I %s %s 2>/dev/null", string.format("%q", iface), string.format("%q", ip))
     return os.execute(cmd) == 0
 end
 
--- 工具函数：解析主机名
+-- 工具函数：解析主机名（缓存版本）
+local hostname_cache = nil
 local function resolve_hostname(mac, ip)
     local mac_upper = mac:upper()
     local f = io.popen("cat /tmp/dhcp.leases 2>/dev/null")
@@ -88,15 +127,15 @@ end
 
 -- 唤醒单台设备
 function awake(sections)
+    if not check_csrf() then return end
+    if not check_section(sections) then return end
+
     local x = luci.model.uci.cursor()
-    local lan = x:get("wolplus", sections, "maceth")
+    local lan = check_iface(x:get("wolplus", sections, "maceth"))
     local mac = x:get("wolplus", sections, "macaddr")
+    local name = x:get("wolplus", sections, "name") or ""
 
-    if not lan or not lan:match("^[%w%-%._]+$") then
-        lan = "br-lan"
-    end
-
-    if not mac or not mac:match("^%x%x:%x%x:%x%x:%x%x:%x%x:%x%x$") then
+    if not check_mac(mac) then
         luci.http.status(400, "Invalid MAC address")
         return
     end
@@ -106,27 +145,20 @@ function awake(sections)
     local p = io.popen(cmd)
     local msg = ""
     if p then
-        while true do
-            local l = p:read("*l")
-            if l then
-                if #l > 100 then l = l:sub(1, 100) .. "..." end
-                msg = msg .. l
-            else
-                break
-            end
-        end
+        msg = p:read("*a") or ""
         p:close()
     end
 
-    local name = x:get("wolplus", sections, "name") or ""
     os.execute(string.format("logger -t wolplus 'awake: %s %s'", string.format("%q", name), string.format("%q", mac)))
 
     luci.http.prepare_content("application/json")
-    luci.http.write_json({success = #msg == 0, data = msg, name = name, mac = mac})
+    luci.http.write_json({success = true, data = msg or "", name = name, mac = mac})
 end
 
 -- 在线状态检查
 function status()
+    if not check_csrf() then return end
+
     local x = luci.model.uci.cursor()
     local devices = {}
 
@@ -162,6 +194,8 @@ end
 
 -- 一键全部唤醒
 function awakeall()
+    if not check_csrf() then return end
+
     local x = luci.model.uci.cursor()
     local results = {}
     local has_any = false
@@ -169,14 +203,14 @@ function awakeall()
     x:foreach("wolplus", "macclient", function(s)
         has_any = true
         local mac = s.macaddr or ""
-        local eth = s.maceth or "br-lan"
+        local eth = check_iface(s.maceth)
         local name = s.name or ""
 
-        if mac:match("^%x%x:%x%x:%x%x:%x%x:%x%x:%x%x$") then
+        if check_mac(mac) then
             local broadcast = get_broadcast(eth)
-            os.execute(string.format("/usr/bin/wol %s %s 2>/dev/null", string.format("%q", mac), string.format("%q", broadcast)))
-            os.execute(string.format("logger -t wolplus 'awake_all: %s %s'", string.format("%q", name), string.format("%q", mac)))
-            table.insert(results, {name = name, mac = mac, success = true})
+            local ok = os.execute(string.format("/usr/bin/wol %s %s 2>/dev/null", string.format("%q", mac), string.format("%q", broadcast))) == 0
+            os.execute(string.format("logger -t wolplus 'awake_all: %s %s success=%s'", string.format("%q", name), string.format("%q", mac), tostring(ok)))
+            table.insert(results, {name = name, mac = mac, success = ok})
         else
             table.insert(results, {name = name, mac = mac, success = false})
         end
@@ -194,6 +228,8 @@ end
 
 -- 导入 ARP 缓存中的在线设备
 function import_arp()
+    if not check_csrf() then return end
+
     local x = luci.model.uci.cursor()
     local existing = {}
     x:foreach("wolplus", "macclient", function(s)
@@ -211,7 +247,7 @@ function import_arp()
                 "^(%S+)%s+0x(%S+)%s+0x(%S+)%s+([%x:]+)%s+(%S+)%s+(%S+)"
             )
             if ip and hw_addr and flags == "2" then
-                if not existing[hw_addr:lower()] then
+                if not existing[hw_addr:lower()] and check_mac(hw_addr) then
                     local hostname = resolve_hostname(hw_addr, ip)
                     table.insert(devices, {
                         mac = hw_addr,

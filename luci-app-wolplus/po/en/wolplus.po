@@ -1,0 +1,95 @@
+msgid "Wake on LAN +"
+msgstr "Wake on LAN +"
+
+msgid "Wake on LAN is a mechanism to remotely boot computers in the local network."
+msgstr "Wake on LAN is a mechanism to remotely boot computers in the local network."
+
+msgid "Wake up your LAN device"
+msgstr "Wake up your LAN device"
+
+msgid "macclient"
+msgstr "Client List"
+
+msgid "name"
+msgstr "Name"
+
+msgid "macaddr"
+msgstr "Client MAC"
+
+msgid "maceth"
+msgstr "Network Interface"
+
+msgid "awake"
+msgstr "Wake Up"
+
+msgid "Please [Save & Apply] your changes first"
+msgstr "Please [Save & Apply] your changes first"
+
+msgid "Wake All"
+msgstr "Wake All"
+
+msgid "Check Status"
+msgstr "Check Status"
+
+msgid "Import from ARP"
+msgstr "Import from ARP"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Online"
+msgstr "Online"
+
+msgid "Offline"
+msgstr "Offline"
+
+msgid "Scheduled Wake"
+msgstr "Scheduled Wake"
+
+msgid "Last Woken"
+msgstr "Last Woken"
+
+msgid "Search..."
+msgstr "Search..."
+
+msgid "Processing..."
+msgstr "Processing..."
+
+msgid "Are you sure you want to wake up all devices?"
+msgstr "Are you sure you want to wake up all devices?"
+
+msgid "Wake All Results"
+msgstr "Wake All Results"
+
+msgid "Awake request sent"
+msgstr "Awake request sent"
+
+msgid "Request failed"
+msgstr "Request failed"
+
+msgid "No devices configured"
+msgstr "No devices configured"
+
+msgid "No new devices found"
+msgstr "No new devices found"
+
+msgid "Found devices, please add them manually"
+msgstr "Found devices, please add them manually"
+
+msgid "Daily wake time in HH:MM format, leave empty to clear"
+msgstr "Daily wake time in HH:MM format, leave empty to clear"
+
+msgid "Wake Up Host"
+msgstr "Wake Up Host"
+
+msgid "Invalid MAC address format"
+msgstr "Invalid MAC address format"
+
+msgid "Invalid time format, expected HH:MM"
+msgstr "Invalid time format, expected HH:MM"
+
+msgid "Hour must be 0-23, minute 0-59"
+msgstr "Hour must be 0-23, minute 0-59"
+
+msgid "Request failed (network error)"
+msgstr "Request failed (network error)"
