@@ -1,33 +1,34 @@
 <%+header%>
+<script type="text/javascript">//<![CDATA[
+	var cbi_maps = [];
+//]]></script>
 
-<form method="post" action="<%=pcdata(REQUEST_URI)%>" enctype="multipart/form-data" onreset="return cbi_validate_reset(this)" onsubmit="return cbi_validate_form(this, '<%:Some fields are invalid, cannot save values!%>')">
+<form method="post" action="<%=pcdata(REQUEST_URI)%>" enctype="multipart/form-data" id="cbi" onreset="return cbi_validate_reset(this)" onsubmit="return cbi_validate_form(this, '<%:Some fields are invalid, cannot save values!%>')">
 	<div>
 		<input type="hidden" name="token" value="<%=token%>" />
 		<input type="hidden" name="cbi.submit" value="1" />
 		<input type="submit" value="<%:Save%>" class="hidden" />
 	</div>
 
-<% include("cbi/map") %>
+	<div class="cbi-map" id="cbi-wolplus">
+		<h2 name="content"><%=self.title%></h2>
+		<% if self.description and #self.description > 0 then %><div class="cbi-map-descr"><%=self.description%></div><% end %>
+		<% if self.message then %><div class="cbi-section-error"><%=self.message%></div><% end %>
+		<% for _, section in ipairs(self.children) do %><% section:render() %><% end %>
+	</div>
 
-<div class="cbi-section" style="margin-bottom:8px;padding:8px;">
-  <button class="cbi-button cbi-button-apply" id="btn_awakeall" onclick="awakeAll()" style="margin-right:6px;">
-    <%:Wake All%>
-  </button>
-  <button class="cbi-button cbi-input-select" id="btn_check_all" onclick="checkAllStatus()" style="margin-right:6px;">
-    <%:Check Status%>
-  </button>
-  <button class="cbi-button cbi-input-select" id="btn_import_arp" onclick="importARP()" style="margin-right:6px;">
-    <%:Import from ARP%>
-  </button>
-  <input type="text" id="search_box" placeholder="<%:Search...%>" oninput="filterTable()" style="float:right;padding:4px 8px;" />
-</div>
+	<div class="cbi-section" style="margin-bottom:8px;padding:8px;">
+		<button class="cbi-button cbi-button-apply" id="btn_awakeall" onclick="awakeAll()" style="margin-right:6px;"><%:Wake All%></button>
+		<button class="cbi-button cbi-input-select" id="btn_check_all" onclick="checkAllStatus()" style="margin-right:6px;"><%:Check Status%></button>
+		<button class="cbi-button cbi-input-select" id="btn_import_arp" onclick="importARP()" style="margin-right:6px;"><%:Import from ARP%></button>
+		<input type="text" id="search_box" placeholder="<%:Search...%>" oninput="filterTable()" style="float:right;padding:4px 8px;" />
+	</div>
 
-<div class="cbi-page-actions">
-	<input class="btn cbi-button cbi-button-apply" type="button" value="<%:Save & Apply%>" onclick="cbi_submit(this, 'cbi.apply')" />
-	<input class="btn cbi-button cbi-button-save" type="submit" value="<%:Save%>" />
-	<input class="btn cbi-button cbi-button-reset" type="button" value="<%:Reset%>" onclick="location.href='<%=REQUEST_URI%>'" />
-</div>
-
+	<div class="cbi-page-actions">
+		<input class="btn cbi-button cbi-button-apply" type="button" value="<%:Save & Apply%>" onclick="cbi_submit(this, 'cbi.apply')" />
+		<input class="btn cbi-button cbi-button-save" type="submit" value="<%:Save%>" />
+		<input class="btn cbi-button cbi-button-reset" type="button" value="<%:Reset%>" onclick="location.href='<%=REQUEST_URI%>'" />
+	</div>
 </form>
 
 <script type="text/javascript">
