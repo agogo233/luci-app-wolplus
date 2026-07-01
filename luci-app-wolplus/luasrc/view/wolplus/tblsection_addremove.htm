@@ -1,6 +1,7 @@
 <div class="cbi-section-create cbi-tblsection-create">
-	<input class="cbi-button cbi-button-add" type="submit"
+	<input type="hidden" name="cbi.submit" value="1" />
+	<input class="cbi-button cbi-button-add" type="button"
+		onclick="var f=this.form,i=document.createElement('input');i.type='hidden';i.name='cbi.state';i.value='add:macclient';f.appendChild(i);f.cbi_state='add-section';f.submit()"
 		value="<%:Add%>"
-		name="cbi.cts.wolplus.macclient"
 		title="<%:Add%>" />
 </div>
