@@ -78,30 +78,3 @@ msgstr "每日唤醒时间 (HH:MM 格式)，留空即清除定时任务"
 
 msgid "Wake Up Host"
 msgstr "唤醒设备"
-
-msgid "Wake on LAN +"
-msgstr "网络唤醒 +"
-
-msgid "Wake on LAN is a mechanism to remotely boot computers in the local network."
-msgstr "Wake on LAN 是一种在局域网内远程启动计算机的机制。"
-
-msgid "Invalid MAC address format"
-msgstr "MAC 地址格式无效"
-
-msgid "Invalid time format, expected HH:MM"
-msgstr "时间格式无效，应使用 HH:MM 格式"
-
-msgid "Hour must be 0-23, minute 0-59"
-msgstr "小时必须为 0-23，分钟必须为 0-59"
-
-msgid "Request failed (network error)"
-msgstr "请求失败（网络错误）"
-
-msgid "Host Clients"
-msgstr "主机列表"
-
-msgid "Network Interface"
-msgstr "网络接口"
-
-msgid "Some fields are invalid, cannot save values!"
-msgstr "存在无效字段，无法保存！"

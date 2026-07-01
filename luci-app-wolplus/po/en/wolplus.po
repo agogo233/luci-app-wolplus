@@ -93,6 +93,3 @@ msgstr "Hour must be 0-23, minute 0-59"
 
 msgid "Request failed (network error)"
 msgstr "Request failed (network error)"
-
-msgid "Some fields are invalid, cannot save values!"
-msgstr "Some fields are invalid, cannot save values!"
