@@ -62,7 +62,8 @@ btn.template = "wolplus/awake"
 function e.create(e, t)
     local id = tostring(os.time()) .. tostring(math.random(999999999))
     math.randomseed(tonumber(tostring(os.time()):reverse():sub(1, 6)))
-    return TypedSection.create(e, id)
+    TypedSection.create(e, id)
+    return id
 end
 
 function t.on_commit(map)
