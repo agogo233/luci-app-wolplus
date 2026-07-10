@@ -3,14 +3,18 @@ module("luci.controller.wolplus", package.seeall)
 function index()
     if not nixio.fs.access("/etc/config/wolplus") then return end
     entry({"admin", "services", "wolplus"}, cbi("wolplus"), _("Wake on LAN"), 95).dependent = true
-    entry({"admin", "services", "wolplus", "awake"}, post("awake")).leaf = true
-    entry({"admin", "services", "wolplus", "status"}, post("status")).leaf = true
-    entry({"admin", "services", "wolplus", "awakeall"}, post("awakeall")).leaf = true
-    entry({"admin", "services", "wolplus", "import_arp"}, post("import_arp")).leaf = true
+    entry({"admin", "services", "wolplus", "awake"}, call("awake")).leaf = true
+    entry({"admin", "services", "wolplus", "status"}, call("status")).leaf = true
+    entry({"admin", "services", "wolplus", "awakeall"}, call("awakeall")).leaf = true
+    entry({"admin", "services", "wolplus", "import_arp"}, call("import_arp")).leaf = true
 end
 
--- 工具函数：校验 CSRF（通过 X-Requested-With 头，由 LuCI XHR 对象自动携带）
+-- 工具函数：校验 CSRF（仅接受 XHR POST 请求）
 local function check_csrf()
+    if luci.http.getenv("REQUEST_METHOD") ~= "POST" then
+        luci.http.status(405, "Method Not Allowed")
+        return false
+    end
     if luci.http.getenv("HTTP_X_REQUESTED_WITH") ~= "XMLHttpRequest" then
         luci.http.status(403, "Forbidden")
         return false
