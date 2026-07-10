@@ -24,6 +24,8 @@ jobs:
           FEEDNAME: packages_ci
           PACKAGES: luci-app-wolplus
           NO_REFRESH_CHECK: true
+          NO_DEFAULT_FEEDS: true
+          EXTRA_FEEDS: src-git|luci|https://github.com/openwrt/luci.git^${{ matrix.branch }}
           V: sc
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
