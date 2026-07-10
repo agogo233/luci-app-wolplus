@@ -61,11 +61,13 @@ btn.template = "wolplus/awake"
 t.children[#t.children+1] = {
     prepare = function(self) end,
     parse = function(self) end,
+    save = function(self) end,
     render = function(self) include("wolplus/custom_actions") end
 }
 t.children[#t.children+1] = {
     prepare = function(self) end,
     parse = function(self) end,
+    save = function(self) end,
     render = function(self) include("wolplus/custom_scripts") end
 }
 
