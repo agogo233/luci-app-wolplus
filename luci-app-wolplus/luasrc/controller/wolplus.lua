@@ -3,10 +3,14 @@ module("luci.controller.wolplus", package.seeall)
 function index()
     if not nixio.fs.access("/etc/config/wolplus") then return end
     entry({"admin", "services", "wolplus"}, cbi("wolplus"), _("Wake on LAN"), 95).dependent = true
-    local awake_entry = entry({"admin", "services", "wolplus", "awake"}, call("awake")).leaf = true
-    local status_entry = entry({"admin", "services", "wolplus", "status"}, call("status")).leaf = true
-    local awakeall_entry = entry({"admin", "services", "wolplus", "awakeall"}, call("awakeall")).leaf = true
-    local import_entry = entry({"admin", "services", "wolplus", "import_arp"}, call("import_arp")).leaf = true
+    local awake_entry = entry({"admin", "services", "wolplus", "awake"}, call("awake"))
+    awake_entry.leaf = true
+    local status_entry = entry({"admin", "services", "wolplus", "status"}, call("status"))
+    status_entry.leaf = true
+    local awakeall_entry = entry({"admin", "services", "wolplus", "awakeall"}, call("awakeall"))
+    awakeall_entry.leaf = true
+    local import_entry = entry({"admin", "services", "wolplus", "import_arp"}, call("import_arp"))
+    import_entry.leaf = true
     awake_entry.post = true
     status_entry.post = true
     awakeall_entry.post = true
