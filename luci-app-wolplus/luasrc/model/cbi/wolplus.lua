@@ -58,10 +58,12 @@ btn.inputstyle = "apply"
 btn.disabled = false
 btn.template = "wolplus/awake"
 
-local act = t:section(Template)
-act.template = "wolplus/custom_actions"
-local scp = t:section(Template)
-scp.template = "wolplus/custom_scripts"
+t.children[#t.children+1] = {
+    render = function() luci.template.include("wolplus/custom_actions") end
+}
+t.children[#t.children+1] = {
+    render = function() luci.template.include("wolplus/custom_scripts") end
+}
 
 function e.create(e, t)
     local id = tostring(os.time()) .. tostring(math.random(999999999))
