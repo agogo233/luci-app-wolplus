@@ -3,23 +3,14 @@ module("luci.controller.wolplus", package.seeall)
 function index()
     if not nixio.fs.access("/etc/config/wolplus") then return end
     entry({"admin", "services", "wolplus"}, cbi("wolplus"), _("Wake on LAN"), 95).dependent = true
-    entry({"admin", "services", "wolplus", "awake"}, call("awake")).leaf = true
-    entry({"admin", "services", "wolplus", "status"}, call("status")).leaf = true
-    entry({"admin", "services", "wolplus", "awakeall"}, call("awakeall")).leaf = true
-    entry({"admin", "services", "wolplus", "import_arp"}, call("import_arp")).leaf = true
-end
-
--- 工具函数：校验 CSRF（仅接受 XHR POST 请求）
-local function check_csrf()
-    if luci.http.getenv("REQUEST_METHOD") ~= "POST" then
-        luci.http.status(405, "Method Not Allowed")
-        return false
-    end
-    if luci.http.getenv("HTTP_X_REQUESTED_WITH") ~= "XMLHttpRequest" then
-        luci.http.status(403, "Forbidden")
-        return false
-    end
-    return true
+    local awake_entry = entry({"admin", "services", "wolplus", "awake"}, call("awake")).leaf = true
+    local status_entry = entry({"admin", "services", "wolplus", "status"}, call("status")).leaf = true
+    local awakeall_entry = entry({"admin", "services", "wolplus", "awakeall"}, call("awakeall")).leaf = true
+    local import_entry = entry({"admin", "services", "wolplus", "import_arp"}, call("import_arp")).leaf = true
+    awake_entry.post = true
+    status_entry.post = true
+    awakeall_entry.post = true
+    import_entry.post = true
 end
 
 -- 工具函数：校验 section 名称格式
@@ -130,7 +121,6 @@ end
 
 -- 唤醒单台设备
 function awake(sections)
-    if not check_csrf() then return end
     if not check_section(sections) then return end
 
     local x = luci.model.uci.cursor()
@@ -160,8 +150,6 @@ end
 
 -- 在线状态检查
 function status()
-    if not check_csrf() then return end
-
     local x = luci.model.uci.cursor()
     local devices = {}
 
@@ -197,8 +185,6 @@ end
 
 -- 一键全部唤醒
 function awakeall()
-    if not check_csrf() then return end
-
     local x = luci.model.uci.cursor()
     local results = {}
     local has_any = false
@@ -231,8 +217,6 @@ end
 
 -- 导入 ARP 缓存中的在线设备
 function import_arp()
-    if not check_csrf() then return end
-
     local x = luci.model.uci.cursor()
     local existing = {}
     x:foreach("wolplus", "macclient", function(s)
