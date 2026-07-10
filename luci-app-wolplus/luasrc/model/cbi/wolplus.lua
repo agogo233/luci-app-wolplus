@@ -3,7 +3,6 @@ local t, e
 local a, nolimit_mac, nolimit_eth, cron, lastwake, btn
 
 t = Map("wolplus", translate("Wake on LAN +"), translate("Wake on LAN is a mechanism to remotely boot computers in the local network."))
-t.template = "wolplus/index"
 e = t:section(TypedSection, "macclient", translate("Host Clients"))
 e.template = "cbi/tblsection"
 e.anonymous = true
@@ -24,7 +23,7 @@ end
 i.net.mac_hints(function(e, t) nolimit_mac:value(e, "%s (%s)" % {e, t}) end)
 
 nolimit_eth = e:option(Value, "maceth", translate("Network Interface"))
-nolimit_eth.rmempty = false
+nolimit_eth.rmempty = true
 for _, dev in ipairs(i.net.devices()) do if dev ~= "lo" then nolimit_eth:value(dev) end end
 
 cron = e:option(Value, "wake_cron", translate("Scheduled Wake"))
@@ -58,6 +57,11 @@ btn.inputtitle = translate("Awake")
 btn.inputstyle = "apply"
 btn.disabled = false
 btn.template = "wolplus/awake"
+
+local act = t:section(Template)
+act.template = "wolplus/custom_actions"
+local scp = t:section(Template)
+scp.template = "wolplus/custom_scripts"
 
 function e.create(e, t)
     local id = tostring(os.time()) .. tostring(math.random(999999999))

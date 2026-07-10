@@ -1,42 +1,23 @@
-<%+header%>
-<script type="text/javascript">//<![CDATA[
-	var cbi_maps = [];
-//]]></script>
-
-<form method="post" action="<%=pcdata(REQUEST_URI)%>" enctype="multipart/form-data" id="cbi" onreset="return cbi_validate_reset(this)" onsubmit="return cbi_validate_form(this, '<%:Some fields are invalid, cannot save values!%>')">
-	<div>
-		<input type="hidden" name="token" value="<%=token%>" />
-		<input type="hidden" name="cbi.submit" value="1" />
-		<input type="submit" value="<%:Save%>" class="hidden" />
-	</div>
-
-	<div class="cbi-map" id="cbi-wolplus">
-		<h2 name="content"><%=self.title%></h2>
-		<% if self.description and #self.description > 0 then %><div class="cbi-map-descr"><%=self.description%></div><% end %>
-		<% if self.message then %><div class="cbi-section-error"><%=self.message%></div><% end %>
-		<% for _, section in ipairs(self.children) do %><% section:render() %><% end %>
-	</div>
-
-	<div class="cbi-section" style="margin-bottom:8px;padding:8px;">
-		<button class="cbi-button cbi-button-apply" id="btn_awakeall" onclick="awakeAll()" style="margin-right:6px;"><%:Wake All%></button>
-		<button class="cbi-button cbi-input-select" id="btn_check_all" onclick="checkAllStatus()" style="margin-right:6px;"><%:Check Status%></button>
-		<button class="cbi-button cbi-input-select" id="btn_import_arp" onclick="importARP()" style="margin-right:6px;"><%:Import from ARP%></button>
-		<input type="text" id="search_box" placeholder="<%:Search...%>" oninput="filterTable()" style="float:right;padding:4px 8px;" />
-	</div>
-
-	<div class="cbi-page-actions">
-		<input class="btn cbi-button cbi-button-apply" type="button" value="<%:Save & Apply%>" onclick="cbi_submit(this, 'cbi.apply')" />
-		<input class="btn cbi-button cbi-button-save" type="submit" value="<%:Save%>" />
-		<input class="btn cbi-button cbi-button-reset" type="button" value="<%:Reset%>" onclick="location.href='<%=REQUEST_URI%>'" />
-	</div>
-</form>
-
 <script type="text/javascript">
 	var filterTimer = null;
 
 	function _id2section(id) {
 		var x = id.split(".");
 		return x[2];
+	}
+
+	function _baseUrl() {
+		var p = window.location.pathname;
+		return p.replace(/\/+$/, '');
+	}
+
+	function _getToken() {
+		var f = document.getElementById('cbi');
+		if (f) {
+			var inp = f.querySelector('input[name="token"]');
+			if (inp) return inp.value;
+		}
+		return '';
 	}
 
 	function resetButton(btn, origVal) {
@@ -66,8 +47,8 @@
 		}, 10000);
 
 		var btnXHR = new XHR();
-		btnXHR.post('<%=url([[admin]], [[services]], [[wolplus]], [[awake]])%>/' + section,
-			{ token: '<%=token%>' },
+		btnXHR.post(_baseUrl() + '/awake/' + section,
+			{ token: _getToken() },
 			function(x, data) {
 				clearTimeout(timeoutId);
 				resetButton(btn, origVal);
@@ -107,8 +88,8 @@
 		}, 15000);
 
 		var xhr = new XHR();
-		xhr.post('<%=url([[admin]], [[services]], [[wolplus]], [[awakeall]])%>',
-			{ token: '<%=token%>' },
+		xhr.post(_baseUrl() + '/awakeall',
+			{ token: _getToken() },
 			function(x) {
 				clearTimeout(timeoutId);
 				btn.disabled = false;
@@ -151,8 +132,8 @@
 		}, 10000);
 
 		var xhr = new XHR();
-		xhr.post('<%=url([[admin]], [[services]], [[wolplus]], [[status]])%>',
-			{ token: '<%=token%>' },
+		xhr.post(_baseUrl() + '/status',
+			{ token: _getToken() },
 			function(x) {
 				clearTimeout(timeoutId);
 				btn.disabled = false;
@@ -198,8 +179,8 @@
 		}, 10000);
 
 		var xhr = new XHR();
-		xhr.post('<%=url([[admin]], [[services]], [[wolplus]], [[import_arp]])%>',
-			{ token: '<%=token%>' },
+		xhr.post(_baseUrl() + '/import_arp',
+			{ token: _getToken() },
 			function(x) {
 				clearTimeout(timeoutId);
 				btn.disabled = false;
@@ -243,6 +224,3 @@
 		}, 150);
 	}
 </script>
-
-<script>cbi_init();</script>
-<%+footer%>

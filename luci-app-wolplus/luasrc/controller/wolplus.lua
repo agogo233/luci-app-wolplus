@@ -2,7 +2,7 @@ module("luci.controller.wolplus", package.seeall)
 
 function index()
     if not nixio.fs.access("/etc/config/wolplus") then return end
-    entry({"admin", "services", "wolplus"}, cbi("wolplus", {noheader = true, nofooter = true}), _("Wake on LAN"), 95).dependent = true
+    entry({"admin", "services", "wolplus"}, cbi("wolplus"), _("Wake on LAN"), 95).dependent = true
     entry({"admin", "services", "wolplus", "awake"}, post("awake")).leaf = true
     entry({"admin", "services", "wolplus", "status"}, post("status")).leaf = true
     entry({"admin", "services", "wolplus", "awakeall"}, post("awakeall")).leaf = true
