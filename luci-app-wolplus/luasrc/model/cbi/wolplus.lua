@@ -62,13 +62,13 @@ t.children[#t.children+1] = {
     prepare = function(self) end,
     parse = function(self) end,
     save = function(self) end,
-    render = function(self) luci.template.include("wolplus/custom_actions") end
+    render = function(self) luci.template.render("wolplus/custom_actions") end
 }
 t.children[#t.children+1] = {
     prepare = function(self) end,
     parse = function(self) end,
     save = function(self) end,
-    render = function(self) luci.template.include("wolplus/custom_scripts") end
+    render = function(self) luci.template.render("wolplus/custom_scripts") end
 }
 
 function e.create(e, t)
