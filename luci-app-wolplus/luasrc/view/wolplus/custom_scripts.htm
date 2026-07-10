@@ -11,15 +11,6 @@
 		return p.replace(/\/+$/, '');
 	}
 
-	function _getToken() {
-		var f = document.getElementById('cbi');
-		if (f) {
-			var inp = f.querySelector('input[name="token"]');
-			if (inp) return inp.value;
-		}
-		return '';
-	}
-
 	function resetButton(btn, origVal) {
 		btn.disabled = false;
 		btn.value = origVal;
@@ -48,7 +39,7 @@
 
 		var btnXHR = new XHR();
 		btnXHR.post(_baseUrl() + '/awake/' + section,
-			{ token: _getToken() },
+			{},
 			function(x, data) {
 				clearTimeout(timeoutId);
 				resetButton(btn, origVal);
@@ -89,7 +80,7 @@
 
 		var xhr = new XHR();
 		xhr.post(_baseUrl() + '/awakeall',
-			{ token: _getToken() },
+			{},
 			function(x) {
 				clearTimeout(timeoutId);
 				btn.disabled = false;
@@ -133,7 +124,7 @@
 
 		var xhr = new XHR();
 		xhr.post(_baseUrl() + '/status',
-			{ token: _getToken() },
+			{},
 			function(x) {
 				clearTimeout(timeoutId);
 				btn.disabled = false;
@@ -180,7 +171,7 @@
 
 		var xhr = new XHR();
 		xhr.post(_baseUrl() + '/import_arp',
-			{ token: _getToken() },
+			{},
 			function(x) {
 				clearTimeout(timeoutId);
 				btn.disabled = false;

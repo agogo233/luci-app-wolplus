@@ -9,10 +9,9 @@ function index()
     entry({"admin", "services", "wolplus", "import_arp"}, post("import_arp")).leaf = true
 end
 
--- 工具函数：校验 CSRF token
+-- 工具函数：校验 CSRF（通过 X-Requested-With 头，由 LuCI XHR 对象自动携带）
 local function check_csrf()
-    local token = luci.http.formvalue("token")
-    if not token or token == "" then
+    if luci.http.getenv("HTTP_X_REQUESTED_WITH") ~= "XMLHttpRequest" then
         luci.http.status(403, "Forbidden")
         return false
     end
