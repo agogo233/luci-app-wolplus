@@ -6,6 +6,8 @@ jobs:
   build:
     name: Build ${{ matrix.arch }}-${{ matrix.branch }}
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
     strategy:
       fail-fast: false
       matrix:
@@ -32,3 +34,12 @@ jobs:
         with:
           name: luci-app-wolplus-${{ matrix.arch }}-${{ matrix.branch }}
           path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+      - name: Clean up old workflow runs
+        if: always()
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          retain_days: 1
+          keep_minimum_runs: 1
+          delete_workflow_pattern: ${{ github.workflow }}
