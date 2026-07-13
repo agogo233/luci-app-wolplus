@@ -7,20 +7,20 @@ msgstr "Wake on LAN is a mechanism to remotely boot computers in the local netwo
 msgid "Wake up your LAN device"
 msgstr "Wake up your LAN device"
 
-msgid "macclient"
-msgstr "Client List"
+msgid "Host Clients"
+msgstr "Host Clients"
 
-msgid "name"
+msgid "Name"
 msgstr "Name"
 
-msgid "macaddr"
-msgstr "Client MAC"
+msgid "MAC Address"
+msgstr "MAC Address"
 
-msgid "maceth"
+msgid "Network Interface"
 msgstr "Network Interface"
 
-msgid "awake"
-msgstr "Wake Up"
+msgid "Awake"
+msgstr "Awake"
 
 msgid "Please [Save & Apply] your changes first"
 msgstr "Please [Save & Apply] your changes first"

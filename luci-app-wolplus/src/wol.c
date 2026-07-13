@@ -208,6 +208,8 @@ int main(int argc, char *argv[])
     if (mac_len > MAC_STR_LEN) {
         die("MAC address too long");
     }
+    /* 修剪尾部空白 */
+    while (mac_len > 0 && isspace((unsigned char)mac_input[mac_len - 1])) mac_len--;
     for (i = 0; i < (int)mac_len; i++) {
         mac_upper[i] = (char)toupper((unsigned char)mac_input[i]);
     }

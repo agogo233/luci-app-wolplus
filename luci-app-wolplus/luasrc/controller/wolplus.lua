@@ -2,7 +2,7 @@ module("luci.controller.wolplus", package.seeall)
 
 function index()
     if not nixio.fs.access("/etc/config/wolplus") then return end
-    entry({"admin", "services", "wolplus"}, cbi("wolplus"), _("Wake on LAN"), 95).dependent = true
+    entry({"admin", "services", "wolplus"}, cbi("wolplus"), _("Wake on LAN +"), 95).dependent = true
     local awake_entry = entry({"admin", "services", "wolplus", "awake"}, call("awake"))
     awake_entry.leaf = true
     local status_entry = entry({"admin", "services", "wolplus", "status"}, call("status"))
@@ -94,8 +94,7 @@ local function ping_check(ip, iface)
     return os.execute(cmd) == 0
 end
 
--- 工具函数：解析主机名（缓存版本）
-local hostname_cache = nil
+-- 工具函数：解析主机名
 local function resolve_hostname(mac, ip)
     local mac_upper = mac:upper()
     local f = io.popen("cat /tmp/dhcp.leases 2>/dev/null")
@@ -141,15 +140,16 @@ function awake(sections)
     local cmd = string.format("/usr/bin/wol %s %s 2>&1", string.format("%q", mac), string.format("%q", broadcast))
     local p = io.popen(cmd)
     local msg = ""
+    local ok = false
     if p then
         msg = p:read("*a") or ""
-        p:close()
+        ok = (p:close() == true)
     end
 
     os.execute(string.format("logger -t wolplus 'awake: %s %s'", string.format("%q", name), string.format("%q", mac)))
 
     luci.http.prepare_content("application/json")
-    luci.http.write_json({success = true, data = msg or "", name = name, mac = mac})
+    luci.http.write_json({success = ok, data = msg or "", name = name, mac = mac})
 end
 
 -- 在线状态检查

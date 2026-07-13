@@ -1,22 +1,25 @@
-msgid "wolplus"
+msgid "Wake on LAN +"
 msgstr "网络唤醒++"
+
+msgid "Wake on LAN is a mechanism to remotely boot computers in the local network."
+msgstr "Wake on LAN 是一种远程唤醒局域网内计算机的机制"
 
 msgid "Wake up your LAN device"
 msgstr "唤醒你的局域网设备"
 
-msgid "macclient"
+msgid "Host Clients"
 msgstr "设备列表"
 
-msgid "name"
+msgid "Name"
 msgstr "名称"
 
-msgid "macaddr"
+msgid "MAC Address"
 msgstr "客户端MAC"
 
-msgid "maceth"
+msgid "Network Interface"
 msgstr "网络接口"
 
-msgid "awake"
+msgid "Awake"
 msgstr "唤醒"
 
 msgid "Please [Save & Apply] your changes first"
@@ -78,3 +81,15 @@ msgstr "每日唤醒时间 (HH:MM 格式)，留空即清除定时任务"
 
 msgid "Wake Up Host"
 msgstr "唤醒设备"
+
+msgid "Invalid MAC address format"
+msgstr "MAC 地址格式无效"
+
+msgid "Invalid time format, expected HH:MM"
+msgstr "时间格式无效，应为 HH:MM"
+
+msgid "Hour must be 0-23, minute 0-59"
+msgstr "小时必须为 0-23，分钟 0-59"
+
+msgid "Request failed (network error)"
+msgstr "请求失败（网络错误）"
