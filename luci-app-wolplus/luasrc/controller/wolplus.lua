@@ -75,7 +75,7 @@ local function check_ip_neigh(mac, iface)
     local f = io.popen(string.format("ip neigh show dev %s 2>/dev/null", string.format("%q", iface)))
     if not f then return false, nil end
     for line in f:lines() do
-        local ip, status, hw_addr = line:match("^(%S+)%s+lladdr%s+([%x:]+)%s+(%S+)")
+        local ip, status, hw_addr = line:match("^(%S+)%s+.*lladdr%s+([%x:]+)%s+(%S+)")
         if ip and hw_addr and hw_addr:lower() == mac_lower then
             if status == "reachable" or status == "stale" or status == "delay" or status == "probe" then
                 f:close()
@@ -168,7 +168,10 @@ function status()
         if not online then
             online, ip = check_ip_neigh(mac, eth)
         end
-        if not online and ip then
+        if not ip then
+            ip = s.ipaddr or ""
+        end
+        if not online and ip ~= "" then
             online = ping_check(ip, eth)
         end
 

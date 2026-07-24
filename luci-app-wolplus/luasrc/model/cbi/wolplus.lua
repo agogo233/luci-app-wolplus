@@ -26,6 +26,25 @@ nolimit_eth = e:option(Value, "maceth", translate("Network Interface"))
 nolimit_eth.rmempty = true
 for _, dev in ipairs(i.net.devices()) do if dev ~= "lo" then nolimit_eth:value(dev) end end
 
+local ipaddr_opt = e:option(Value, "ipaddr", translate("IP Address (optional)"))
+ipaddr_opt.rmempty = true
+ipaddr_opt.placeholder = "192.168.1.100"
+ipaddr_opt.description = translate("Set a static IP for status check when ARP/neighbor fails")
+ipaddr_opt.validate = function(self, value, section)
+    if value == "" then return value end
+    if not value:match("^%d+%.%d+%.%d+%.%d+$") then
+        return nil, translate("Invalid IP address format")
+    end
+    local parts = {value:match("^(%d+)%.(%d+)%.(%d+)%.(%d+)$")}
+    for _, p in ipairs(parts) do
+        local n = tonumber(p)
+        if not n or n < 0 or n > 255 then
+            return nil, translate("Invalid IP address format")
+        end
+    end
+    return value
+end
+
 cron = e:option(Value, "wake_cron", translate("Scheduled Wake"))
 cron.placeholder = "07:30"
 cron.description = translate("Daily wake time in HH:MM format, leave empty to clear")
